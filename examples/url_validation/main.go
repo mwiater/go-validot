@@ -17,7 +17,7 @@ func main() {
 	})
 	logger.SetLevel(logrus.InfoLevel) // Default log level
 
-	// Create a new validator with default plugins and settings
+	// Create a new validator
 	validator := validot.NewValidator(validot.Config{
 		RequireQuotes: true,   // Enforce that values must be quoted
 		Verbose:       true,   // Enable verbose logging

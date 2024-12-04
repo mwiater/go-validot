@@ -1,10 +1,10 @@
 # go-validot
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/mwiater/go-validot.svg)](https://pkg.go.dev/github.com/mwiater/go-validot)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mwiater/go-validot.svg)](https://pkg.go.dev/github.com/mwiater/go-validot) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **go-validot** is a robust Go package designed to validate `.env` files, ensuring that your application's environment configurations are correctly set and adhere to specified standards. With support for custom plugins, comprehensive configuration options, and a suite of examples, `go-validot` offers a flexible solution for managing environment variables effectively.
 
-[MIT License](./LICENSE)
+[MIT License](./LICENSE) 
 
 ## Table of Contents
 
@@ -40,53 +40,27 @@ Ensure that you have [Go](https://golang.org/dl/) installed and properly configu
 
 Using `go-validot` is straightforward. Below is a basic example of how to integrate it into your Go project:
 
-1. **Import the Package:**
+```go
+// examples/default_usage/main.go
+package main
 
-   ```go
-   import (
-       "github.com/mwiater/go-validot"
-       "github.com/sirupsen/logrus"
-   )
-   ```
+import (
+	"github.com/mwiater/go-validot"
+)
 
-2. **Configure and Initialize the Validator:**
+func main() {
+	// Define required keys
+	requiredKeys := []string{"API_KEY", "DB_HOST", "API_URL", "ENVIRONMENT", "ENABLE_DEBUG", "TRUSTED_PROXY_IP"}
 
-   ```go
-   // Initialize logger
-   logger := logrus.New()
-   logger.SetOutput(os.Stdout)
-   logger.SetLevel(logrus.InfoLevel)
+	// Create a new validator with default settings
+	validator := validot.NewValidator(validot.Config{}, requiredKeys)
 
-   // Define required keys
-   requiredKeys := map[string]bool{
-       "API_URL":          true,
-       "SERVICE_ENDPOINT": true,
-       "DB_HOST":          true,
-       "ENVIRONMENT":      true,
-       "ENABLE_DEBUG":     true,
-       "TRUSTED_PROXY_IP": true,
-   }
+	// Validate the .env file
+	_ = validator.ValidateDotEnv(".env") // No need to log success here
+}
+```
 
-   // Create validator with desired configuration
-   validator := validot.NewValidator(validot.Config{
-       RequireQuotes: true,
-       Verbose:       true,
-       Logger:        logger,
-       Plugins:       []validot.ValidationPlugin{&validot.CacheSizeValidationPlugin{}},
-   }, requiredKeys)
-
-   // Validate the .env file
-   err := validator.ValidateDotEnv(".env")
-   if err != nil {
-       logger.Fatalf("Validation failed: %v", err)
-   }
-
-   logger.Info(".env file is valid.")
-   ```
-
-3. **Run Your Application:**
-
-   Ensure that your `.env` file is present in the expected location and run your application as usual. The validator will check the `.env` file against the defined rules and log the results accordingly.
+Ensure that your `.env` file is present in the expected location and run your application as usual. The validator will check the `.env` file against the defined rules and log the results accordingly.
 
 ## Examples
 
@@ -94,7 +68,97 @@ Using `go-validot` is straightforward. Below is a basic example of how to integr
 
 ### Available Examples
 
-1. **Boolean Validation**
+**NOTE:** To show functionality, most of the examples have the `validot.Config` `Verbose` set to `true`.
+
+Creating a validator with default settings:
+
+```
+validator := validot.NewValidator(validot.Config{}, requiredKeys)
+```
+
+Is equivalent to:
+
+```
+	validator := validot.NewValidator(validot.Config{
+		RequireQuotes: false,  // Don't nforce that values must be quoted
+		Verbose:       false,  // EnDisableable verbose logging
+		Logger:        nil,    // Don't use a custom logger
+		Plugins:       nil,    // Only use built-in plugins
+	}, requiredKeys)
+```
+
+1. **Custom Logger**
+
+   - **Description:** Pass a custom logrus logger to format your logs. The following example just shows changing the logging to JSON instead of text.
+   - **How to Run:**
+     ```bash
+     cd examples/custom_logger
+     go run .
+     ```
+   - **Expected Output:**
+      ```
+      {"level":"info","msg":"Validator Configuration:","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  RequireQuotes: false","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  Verbose: true","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  Number of Plugins: 4","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"End of Configuration","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Starting validation for file: .env","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: DB_PORT","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  DB_PORT is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: ENVIRONMENT","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  ENVIRONMENT is a required variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  [Validated by: EnumValidationPlugin]","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: LOG_FORMAT","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  LOG_FORMAT is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: ENABLE_FEATURE_Y","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  ENABLE_FEATURE_Y is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: DB_NAME","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  DB_NAME is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: CACHE_SIZE","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  CACHE_SIZE is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: USE_SSL","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  USE_SSL is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: DB_USER","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  DB_USER is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: API_KEY","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  API_KEY is a required variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: ENABLE_FEATURE_X","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  ENABLE_FEATURE_X is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: SERVICE_ENDPOINT","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  SERVICE_ENDPOINT is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: REDIS_HOST","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  REDIS_HOST is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: LOG_LEVEL","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  LOG_LEVEL is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: SERVICE_VERSION","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  SERVICE_VERSION is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: DB_PASSWORD","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  DB_PASSWORD is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: TRUSTED_PROXY_IP","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  TRUSTED_PROXY_IP is a required variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  [Validated by: IPAddressValidationPlugin]","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: REDIS_PORT","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  REDIS_PORT is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: UPLOAD_LIMIT","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  UPLOAD_LIMIT is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: ENABLE_DEBUG","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  ENABLE_DEBUG is a required variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  [Validated by: BooleanValidationPlugin]","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: DB_HOST","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  DB_HOST is a required variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: SERVICE_TIMEOUT","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  SERVICE_TIMEOUT is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: API_SECRET","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  API_SECRET is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: API_TIMEOUT","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  API_TIMEOUT is an optional variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"Processing key: API_URL","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  API_URL is a required variable.","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":"  [Validated by: URLValidationPlugin]","time":"2024-12-03T17:19:57-08:00"}
+      {"level":"info","msg":".env file is valid.","time":"2024-12-03T17:19:57-08:00"}
+      ```
+
+2. **Boolean Validation**
 
    - **Description:** Validates boolean environment variables, ensuring they accept only predefined boolean values.
    - **How to Run:**

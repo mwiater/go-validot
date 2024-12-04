@@ -1,4 +1,4 @@
-// examples/enum_validation/main.go
+// examples/default_usage/main.go
 package main
 
 import (
@@ -8,21 +8,17 @@ import (
 
 func main() {
 	// Define required keys
-	requiredKeys := []string{"ENVIRONMENT", "LOG_LEVEL", "DB_HOST"}
+	requiredKeys := []string{"API_KEY", "DB_HOST", "API_URL", "ENVIRONMENT", "ENABLE_DEBUG", "TRUSTED_PROXY_IP"}
 
 	// Initialize a custom logger
 	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp: true,
-	})
-	logger.SetLevel(logrus.InfoLevel) // Default log level
+	logger.SetFormatter(&logrus.JSONFormatter{})
 
-	// Create a new validator
 	validator := validot.NewValidator(validot.Config{
-		RequireQuotes: true,   // Enforce that values must be quoted
+		RequireQuotes: false,  // Do not enforce that values must be quoted
 		Verbose:       true,   // Enable verbose logging
 		Logger:        logger, // Use the custom logger
-		Plugins:       nil,    // Use built-in plugins
+		Plugins:       nil,    // No additional plugins; built-in plugins are included automatically
 	}, requiredKeys)
 
 	// Validate the .env file
