@@ -1,6 +1,10 @@
 # go-validot
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/mwiater/go-validot.svg)](https://pkg.go.dev/github.com/mwiater/go-validot)
+
 **go-validot** is a robust Go package designed to validate `.env` files, ensuring that your application's environment configurations are correctly set and adhere to specified standards. With support for custom plugins, comprehensive configuration options, and a suite of examples, `go-validot` offers a flexible solution for managing environment variables effectively.
+
+[MIT License](./LICENSE)
 
 ## Table of Contents
 
