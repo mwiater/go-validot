@@ -37,7 +37,7 @@ func (p *URLValidationPlugin) Validate(key, value string) (bool, error) {
 	if len(p.AllowedSchemes) > 0 {
 		validScheme := false
 		for _, scheme := range p.AllowedSchemes {
-			if strings.ToLower(parsedURL.Scheme) == strings.ToLower(scheme) {
+			if strings.EqualFold(parsedURL.Scheme, scheme) { // Use EqualFold here
 				validScheme = true
 				break
 			}
